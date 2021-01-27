@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module type="JAVA_MODULE" version="4">
+  <component name="NewModuleRootManager" inherit-compiler-output="true">
+    <exclude-output />
+    <content url="file://$MODULE_DIR$">
+      <sourceFolder url="file://$MODULE_DIR$/src" isTestSource="false" />
+    </content>
+    <orderEntry type="inheritedJdk" />
+    <orderEntry type="sourceFolder" forTests="false" />
+    <orderEntry type="library" name="android" level="project" />
+    <orderEntry type="library" name="android18" level="project" />
+    <orderEntry type="library" name="android4" level="project" />
+    <orderEntry type="library" name="android11" level="project" />
+    <orderEntry type="library" name="android13" level="project" />
+    <orderEntry type="library" name="android17" level="project" />
+    <orderEntry type="library" name="android23" level="project" />
+    <orderEntry type="library" name="android2" level="project" />
+    <orderEntry type="library" name="android25" level="project" />
+    <orderEntry type="library" name="android5" level="project" />
+    <orderEntry type="library" name="android6" level="project" />
+    <orderEntry type="library" name="android21" level="project" />
+    <orderEntry type="library" name="android7" level="project" />
+    <orderEntry type="library" name="android16" level="project" />
+    <orderEntry type="library" name="android15" level="project" />
+    <orderEntry type="library" name="android8" level="project" />
+    <orderEntry type="library" name="android1" level="project" />
+    <orderEntry type="library" name="libs" level="project" />
+    <orderEntry type="library" name="android12" level="project" />
+    <orderEntry type="library" name="android14" level="project" />
+    <orderEntry type="library" name="android10" level="project" />
+    <orderEntry type="library" name="android9" level="project" />
+    <orderEntry type="library" name="android22" level="project" />
+    <orderEntry type="library" name="android26" level="project" />
+    <orderEntry type="library" name="android3" level="project" />
+    <orderEntry type="library" name="android19" level="project" />
+    <orderEntry type="library" name="system" level="project" />
+  </component>
+</module>

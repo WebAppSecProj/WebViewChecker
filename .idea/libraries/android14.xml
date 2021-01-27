@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="android14">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/libs/android-platforms/android-14/android.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

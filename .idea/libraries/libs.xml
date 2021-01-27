@@ -1,0 +1,12 @@
+<component name="libraryTable">
+  <library name="libs">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/libs/soot-infoflow-android-classes.jar!/" />
+      <root url="jar://$PROJECT_DIR$/libs/argparse4j-0.8.1.jar!/" />
+      <root url="jar://$PROJECT_DIR$/libs/soot-infoflow-classes.jar!/" />
+      <root url="jar://$PROJECT_DIR$/libs/soot-4.2.1-jar-with-dependencies.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

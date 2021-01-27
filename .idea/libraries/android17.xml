@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="android17">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/libs/android-platforms/android-10/android.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

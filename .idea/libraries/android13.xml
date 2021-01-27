@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="android13">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/libs/android-platforms/android-13/android.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>
