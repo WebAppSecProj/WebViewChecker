@@ -4,7 +4,7 @@
 The **WebViewChecker** is used to distill argument of webview component.
 
 ```shell
-usage: WebViewChecker [-h] -f FILE
+usage: WebViewCheckerCHA [-h] -f FILE
 
 Distill argument of WebView.
 
