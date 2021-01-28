@@ -63,6 +63,7 @@ public class WebViewCheckerCHA {
             
             // set Scene
             Scene.v().loadNecessaryClasses();
+            loadBody();
 
             // onCreate in main activity only
             String c = Common.getMainActivityName(Common.apkFile);
@@ -94,4 +95,20 @@ public class WebViewCheckerCHA {
             Stats.dumpTimeInfo();
         }
     }
+
+    private static void loadBody() {
+        for(SootClass c: Scene.v().getClasses()) {
+            for (SootMethod m : c.getMethods()) {
+                // https://mailman.cs.mcgill.ca/pipermail/soot-list/2006-January/000472.html
+                if (m.hasActiveBody() == false) {
+                    try {
+                        m.retrieveActiveBody();
+                    } catch (Exception e) {
+
+                    }
+                }
+            }
+        }
+    }
+
 }

@@ -4,8 +4,13 @@ import heros.IFDSTabulationProblem;
 import heros.InterproceduralCFG;
 import heros.solver.IFDSSolver;
 import soot.*;
+import soot.dava.DavaBody;
+import soot.dava.internal.AST.ASTMethodNode;
+import soot.dava.internal.AST.ASTNode;
+import soot.dava.toolkits.base.AST.traversals.AllVariableUses;
 import soot.dexpler.DalvikThrowAnalysis;
 import soot.jimple.*;
+import soot.jimple.internal.JArrayRef;
 import soot.jimple.internal.JVirtualInvokeExpr;
 import soot.jimple.toolkits.callgraph.CallGraph;
 import soot.jimple.toolkits.ide.exampleproblems.IFDSReachingDefinitions;
@@ -19,6 +24,7 @@ import soot.toolkits.scalar.Pair;
 import soot.toolkits.scalar.SimpleLocalDefs;
 import soot.toolkits.scalar.SimpleLocalUses;
 import soot.toolkits.scalar.UnitValueBoxPair;
+import soot.util.Chain;
 
 import java.util.*;
 import java.util.logging.Logger;
@@ -79,8 +85,8 @@ public class WebViewAnalyzerCHA extends SceneTransformer{
                     for (SootMethod callee : ((AbstractJimpleBasedICFG) Common.entryInfo.get(0).get("icfg")).getCalleesOfCallAt(stmt)) {
                     // for (SootMethod callee : icfg_t.getCalleesOfCallAt(stmt)) {
                         // supplement the applicationMethod
-                        logInfo.info(callee.getSignature());
-                        logInfo.info(stmt.toString());
+//                        logInfo.info(callee.getSignature());
+//                        logInfo.info(stmt.toString());
                         if (callee.getSignature().equals("<android.app.Activity: void startActivity(android.content.Intent)>")) {
                             isStartActivity = true;
                         }
@@ -169,8 +175,13 @@ public class WebViewAnalyzerCHA extends SceneTransformer{
         // test case: "./testcase/a3ec5b6abe04471d3311a157ed1ae852.apk"
         // test case: "./testcase/435738b93f9baed84b62400996ef07a3.apk"
 
-        // logInfo.info(value.getClass().toString());
+        logInfo.info(value.getClass().toString());
 
+        if (value instanceof StringConstant)
+        {
+            urls.add(((StringConstant) value).value);
+            return;
+        }
         if (value instanceof Local) {
             BriefUnitGraph briefUnitGraph = new BriefUnitGraph(sootMethod.getActiveBody());
             SimpleLocalDefs simpleLocalDefs = new SimpleLocalDefs(briefUnitGraph);
@@ -181,7 +192,7 @@ public class WebViewAnalyzerCHA extends SceneTransformer{
 
                 AssignStmt as = (AssignStmt) s;
                 Value v = as.getRightOp();
-                // logInfo.info(v.getClass().toString());
+                logInfo.info(v.getClass().toString());
                 if (v instanceof JVirtualInvokeExpr) {
                     JVirtualInvokeExpr vt = (JVirtualInvokeExpr) v;
                     if(vt.getMethod().getSignature().equals("<android.content.Context: java.lang.String getString(int)>")) {
@@ -193,7 +204,29 @@ public class WebViewAnalyzerCHA extends SceneTransformer{
                     }
                 }
                 if (v instanceof StaticFieldRef) {
+
                     searchConst(v, s, null, urls);
+                }
+                if (v instanceof JArrayRef)
+                {
+//                    for(Unit uu: sootMethod.getActiveBody().getUnits())
+//                        System.out.println(uu.toString());
+
+                    JArrayRef jr = (JArrayRef) v;
+                    Value vt = jr.getBase();
+                    if(vt instanceof Local)                     // global? local?
+                    {
+                        List<Unit> defs_t = simpleLocalDefs.getDefsOf((Local)vt);
+                        for (Unit u_t : defs_t) {
+                            SimpleLocalUses simpleLocalUses = new SimpleLocalUses(briefUnitGraph, simpleLocalDefs);
+                            List<UnitValueBoxPair> uses = simpleLocalUses.getUsesOf(u_t);
+                            for (UnitValueBoxPair l : uses) {
+                                Stmt stmt_t = (Stmt) l.getUnit();
+                                if(stmt_t instanceof AssignStmt && ((AssignStmt) stmt_t).getLeftOp().equivTo(jr))
+                                    searchConst(((AssignStmt) stmt_t).getRightOp(), stmt_t, sootMethod, urls);
+                            }
+                        }
+                    }
                 }
                 if (v instanceof Local) {
                     logInfo.info("TODO");
@@ -203,14 +236,81 @@ public class WebViewAnalyzerCHA extends SceneTransformer{
 
         if (value instanceof StaticFieldRef)
         {
-            StaticFieldRef vt = (StaticFieldRef) value;
-            List<ValueBox> vb = vt.getUseBoxes();
-            SootField sf = vt.getField();
-            // TODO:: how to obtain all references to a SootField?
-            logInfo.info("placeholder");
+            Map<Unit, SootMethod> xref = getXRef(value);
+            for(Unit u: xref.keySet())
+            {
+                Stmt s = (Stmt) u;
+                if(s instanceof AssignStmt && ((AssignStmt)s).getLeftOp().equivTo(value))   // find the defs
+                {
+                    if (((AssignStmt)s).getRightOp() instanceof Local)
+                        searchConst(((AssignStmt)s).getRightOp(), s, xref.get(u), urls);
+                }
+            }
 
         }
     }
 
 
+    private static Map<Unit, SootMethod> getXRef(Value v)
+    {
+        Map<Unit, SootMethod> retMe = new HashMap<>();
+        for(SootClass c :Scene.v().getClasses()) {
+            if(!c.isApplicationClass()) continue;
+            for(SootMethod m: c.getMethods()) {
+                if (!m.hasActiveBody()) continue;
+                for(Unit u: m.getActiveBody().getUnits())
+                {
+                    for(ValueBox vb: u.getUseAndDefBoxes())
+                    {
+                        if(vb.getValue().equivTo(v))
+                            retMe.put(u, m);
+                    }
+                }
+            }
+        }
+        return retMe;
+    }
+    /*
+    AllVariableUses works on DavaBody, but not JimpleBody, so I give up using AllVariableUses.
+    https://github.com/soot-oss/soot/issues/1085
+    static AllVariableUses allVariableUses = buildAllVariableUsesObj();
+
+    private static AllVariableUses buildAllVariableUsesObj()
+    {
+        ASTMethodNode astMethodNode = null;
+
+        for(SootClass c :Scene.v().getClasses())
+        {
+            if(c.containsBafBody())
+                logInfo.info("placeholder");
+            if(!c.isApplicationClass()) continue;
+            for(SootMethod m: c.getMethods())
+            {
+//                if(m.toString().contains("onKeyLongPress"))
+//                    logInfo.info("onKeyLongPress");
+                List<Object> lb = new ArrayList<>();
+                if(m.hasActiveBody()) {
+                    lb.add(m.getActiveBody());
+
+                    Body clinitBody = m.getActiveBody();
+                    Chain units = ((DavaBody) clinitBody).getUnits();
+
+                    if (units.size() != 1) {
+                        throw new RuntimeException("DavaBody AST doesn't have single root.");
+                    }
+
+                    ASTNode AST = (ASTNode) units.getFirst();
+                    if (!(AST instanceof ASTMethodNode)) {
+                        throw new RuntimeException("Starting node of DavaBody AST is not an ASTMethodNode");
+                    }
+
+                    DavaBody db = astMethodNode.getDavaBody();
+                    db = astMethodNode.getDavaBody();
+                }
+            }
+        }
+
+        return new AllVariableUses(astMethodNode);
+    }
+     */
 }

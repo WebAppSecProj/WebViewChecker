@@ -44,3 +44,6 @@ Since there is no abstract for `findViewById` in line 1,
 `Spark` fails to solve the `loadUrl` in line 2 (check WebViewAnalyzerSpark.java). 
 So I give up using `Spark` but to build the analysis from the scratch. 
 
+# TODO
+It's messy coding, the project needs refactoring.
+And it's now a sample specific parser, I need more samples to build a compatible tool.
